@@ -1,4 +1,5 @@
 import tkinter as tk
+import appGui
 
 def center_window(window, width, height):
     screen_width = window.winfo_screenwidth()
@@ -10,12 +11,11 @@ def center_window(window, width, height):
 root = tk.Tk()
 root.title("Dem som vet")
 root.geometry("570x500")
-
 center_window(root, 570, 500)
-
 root.config(bg='#2e2e2e')
 
 homepage_frame = tk.Frame(root, bg='#2e2e2e')
+appGui.create_homepage(homepage_frame)
 homepage_frame.pack()
 
 root.mainloop()
