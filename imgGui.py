@@ -5,7 +5,7 @@ import app
 import gui
 
 
-picchanger_page_frame = tk.Frame(main.root, bg='#2e2e2e')
+picchanger_page_frame = tk.Frame(app.root, bg='#2e2e2e')
 
 picchanger_label = tk.Label(picchanger_page_frame, text="Picture File Type Changer", font=("Arial", 16), fg="white", bg='#2e2e2e')
 picchanger_label.pack(pady=20)
@@ -41,5 +41,5 @@ back_button_picchanger = tk.Button(picchanger_page_frame, text="Back to Homepage
 back_button_picchanger.pack(pady=10)
 
 # Add a copyright label at the bottom
-copyright_label = tk.Label(main.root, text="© 2024 Dem Som Vet", font=("Arial", 10), fg="white", bg='#2e2e2e')
+copyright_label = tk.Label(app.root, text="© 2024 Dem Som Vet", font=("Arial", 10), fg="white", bg='#2e2e2e')
 copyright_label.pack(side="bottom", pady=10)
