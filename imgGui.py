@@ -5,7 +5,7 @@ import app
 import gui
 
 
-picchanger_page_frame = tk.Frame(app.root, bg='#2e2e2e')
+picchanger_page_frame = tk.Frame(frame, bg='#2e2e2e')
 
 picchanger_label = tk.Label(picchanger_page_frame, text="Picture File Type Changer", font=("Arial", 16), fg="white", bg='#2e2e2e')
 picchanger_label.pack(pady=20)

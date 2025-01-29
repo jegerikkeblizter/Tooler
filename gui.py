@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image
-import imgConverter
+import imgGui
 import youtubeGui
 
 
@@ -10,7 +10,7 @@ def set_gui_app(app):
 
 def show_youtube_page():
     _app.homepage_frame.pack_forget()
-    imgConverter.picchanger_page_frame.pack_forget()
+    imgGui.picchanger_page_frame.pack_forget()
     youtubeGui.youtube_page_frame.pack()
 
 
@@ -18,11 +18,11 @@ def show_youtube_page():
 def show_picchanger_page():
     _app.homepage_frame.pack_forget()
     youtubeGui.youtube_page_frame.pack_forget()
-    imgConverter.picchanger_page_frame.pack()
+    imgGui.picchanger_page_frame.pack()
 
 
 # Function to go back to the homepage
 def go_home():
     youtubeGui.youtube_page_frame.pack_forget()
-    imgConverter.picchanger_page_frame.pack_forget()
+    imgGui.picchanger_page_frame.pack_forget()
     _app.homepage_frame.pack()
