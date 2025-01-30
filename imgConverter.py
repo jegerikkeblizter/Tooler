@@ -13,9 +13,9 @@ def convert_image(input_file, output_format):
 
             img.save(output_file, format="JPEG" if output_format.lower() in ["jpg", "jpeg"] else output_format.upper())
 
-            return output_file, None  # Successfully converted, no error
+            return output_file, None 
     except Exception as e:
-        return None, str(e)  # Return error message if conversion fails
+        return None, str(e)
 
 def delete_original_image(file_path):
     try:

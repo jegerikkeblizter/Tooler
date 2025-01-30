@@ -2,6 +2,7 @@ import customtkinter as Ctk
 from CTkMessagebox import CTkMessagebox
 import youtubedown
 import imgConverter
+from PIL import Image
 
 class App(Ctk.CTk):
     def __init__(self):
@@ -26,13 +27,24 @@ class App(Ctk.CTk):
         self.menu_frame = Ctk.CTkFrame(self, fg_color="#21266B", corner_radius=0, border_color="black", border_width=0.7)
         self.menu_frame.pack(side="left", fill="both")
 
-        label = Ctk.CTkLabel(self.current_frame, text="Hei Mister!", font=("Arial", 10))
+        label = Ctk.CTkLabel(self.current_frame, text="Welcome To Tooler!", font=("Arial", 25, "bold"))
         label.pack(pady=20)
 
-        button = Ctk.CTkButton(self.menu_frame, text="Youtube downloader", command=self.show_youtube)
+        whats_new = Ctk.CTkLabel(self.current_frame, text="Whats new? ", font=("Arial", 20))
+        whats_new.pack(side="top", padx=(0,400), pady=(30,0))
+
+        whats_new_text = Ctk.CTkLabel(self.current_frame, text="• Changed from Tkinter to CustomTkinter\n\n""• Updated UI\n\n""• Added ICO picture\n\n""• Cleaned up code\n\n""• Added new tools", justify="left" ,font=("Arial", 15))
+        whats_new_text.pack(side="left", padx=(60,0), pady=(0,150))
+
+        water = Ctk.CTkImage(light_image=Image.open('wave.png'), dark_image=Image.open('wave.png'), size=(300,200))
+        water_wave = Ctk.CTkLabel(self.current_frame, text="", image=water)
+        water_wave.pack(side="right", pady=(0,150))
+
+
+        button = Ctk.CTkButton(self.menu_frame, text="Youtube Downloader", command=self.show_youtube)
         button.pack(pady=20, padx=10)
 
-        button2 = Ctk.CTkButton(self.menu_frame, text="Bilde konverterer", command=self.show_imgconverter)
+        button2 = Ctk.CTkButton(self.menu_frame, text="Image Converter", command=self.show_imgconverter)
         button2.pack()
 
     def show_youtube(self):
@@ -47,31 +59,29 @@ class App(Ctk.CTk):
             selected_file_type = file_type.get()
             youtubedown.start_download(youtube_url, selected_file_type)
 
-        youtube_page_label = Ctk.CTkLabel(self.current_frame, text="YouTube Video Downloader", font=("Arial", 16), fg_color="white", bg_color='#2e2e2e')
+        youtube_page_label = Ctk.CTkLabel(self.current_frame, text="YouTube Video Downloader", font=("Arial",20, "bold"))
         youtube_page_label.pack(pady=20)
 
-        # YouTube video downloader UI elements
-        url_label = Ctk.CTkLabel(self.current_frame, text="Enter YouTube URL:", font=("Arial", 12), fg_color="white", bg_color='#2e2e2e')
+        url_label = Ctk.CTkLabel(self.current_frame, text="Enter YouTube URL:", font=("Arial", 12))
         url_label.pack(pady=5)
 
-        url_entry = Ctk.CTkEntry(self.current_frame, width=50, font=("Arial", 10))
-        url_entry.pack(pady=5, ipady=5)
+        url_entry = Ctk.CTkEntry(self.current_frame, width=500, font=("Arial", 10))
+        url_entry.pack(pady=2, ipady=6)
 
-        file_type_label = Ctk.CTkLabel(self.current_frame, text="Select File Type:", font=("Arial", 12), fg_color="white", bg_color='#2e2e2e')
-        file_type_label.pack(pady=10)
+        file_type_label = Ctk.CTkLabel(self.current_frame, text="Select File Type:", font=("Arial", 12))
+        file_type_label.pack(pady=(20, 0))
 
         file_type = Ctk.StringVar(value="mp4")
-        mp4_radio = Ctk.CTkRadioButton(self.current_frame, text="MP4", variable=file_type, value="mp4", font=("Arial", 10), fg_color="white", bg_color='#2e2e2e')
-        mp4_radio.pack()
+        mp4_radio = Ctk.CTkRadioButton(self.current_frame, text="MP4", variable=file_type, value="mp4", font=("Arial", 10))
+        mp4_radio.pack(pady=(0, 10))
 
-        mp3_radio = Ctk.CTkRadioButton(self.current_frame, text="MP3", variable=file_type, value="mp3", font=("Arial", 10), fg_color="white", bg_color='#2e2e2e')
+        mp3_radio = Ctk.CTkRadioButton(self.current_frame, text="MP3", variable=file_type, value="mp3", font=("Arial", 10))
         mp3_radio.pack()
 
-        # Download button now calls handle_youtube_download
-        download_button = Ctk.CTkButton(self.current_frame, text="Download", font=("Arial", 12), bg_color="#4caf50", fg_color="white", command=handle_youtube_download )
+        download_button = Ctk.CTkButton(self.current_frame, text="Download", font=("Arial", 12), command=handle_youtube_download )
         download_button.pack(pady=20)
 
-        back_button_youtube = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12), bg_color="#f44336", fg_color="white")
+        back_button_youtube = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
         back_button_youtube.pack(pady=10)
     
     def show_imgconverter(self):
@@ -107,13 +117,11 @@ class App(Ctk.CTk):
         convert_button = Ctk.CTkButton(self.current_frame, text="Convert", command=self.start_conversion, font=("Arial", 12, "bold"))
         convert_button.pack(pady=20)
 
-        self.delete_button = Ctk.CTkButton(self.current_frame, text="Delete Original Image",
-                                           command=self.delete_original_image, font=("Arial", 12),
+        self.delete_button = Ctk.CTkButton(self.current_frame, text="Delete Original Image", command=self.delete_original_image, font=("Arial", 12),
                                            state="disabled")
         self.delete_button.pack(pady=10)
 
-        back_button_picchanger = Ctk.CTkButton(self.current_frame, text="Back to Homepage",
-                                               command=self.show_homepage, font=("Arial", 12))
+        back_button_picchanger = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
         back_button_picchanger.pack(pady=10)
 
         copyright_label = Ctk.CTkLabel(self.current_frame, text="© 2024 Dem Som Vet", font=("Arial", 10))

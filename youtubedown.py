@@ -25,7 +25,7 @@ def download_youtube_video(youtube_url, output_path, file_type):
 
         video_path = os.path.join(output_path, "%(title)s.%(ext)s")
         command = [
-            yt_dlp_path,  # Explicit path to yt-dlp
+            yt_dlp_path,
             "-f", format_option,
             "-o", video_path,
             "--ffmpeg-location", ffmpeg_path
