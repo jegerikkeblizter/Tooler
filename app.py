@@ -2,7 +2,10 @@ import customtkinter as Ctk
 from CTkMessagebox import CTkMessagebox
 import youtubedown
 import imgConverter
+import speedtest
 from PIL import Image
+import time
+import threading
 
 class App(Ctk.CTk):
     def __init__(self):
@@ -33,8 +36,8 @@ class App(Ctk.CTk):
         whats_new = Ctk.CTkLabel(self.current_frame, text="Whats new? ", font=("Arial", 20))
         whats_new.pack(side="top", padx=(0,400), pady=(30,0))
 
-        whats_new_text = Ctk.CTkLabel(self.current_frame, text="• Changed from Tkinter to CustomTkinter\n\n""• Updated UI\n\n""• Added ICO picture\n\n""• Cleaned up code\n\n""• Added new tools", justify="left" ,font=("Arial", 15))
-        whats_new_text.pack(side="left", padx=(60,0), pady=(0,150))
+        whats_new_text = Ctk.CTkLabel(self.current_frame, text="• Changed from Tkinter to CustomTkinter\n\n""• Updated UI\n\n""• Added ICO picture\n\n""• Cleaned up code\n\n""• MORE NEW TOOLS!\n\n""• New logo\n\n""• New brand name", justify="left" ,font=("Arial", 15))
+        whats_new_text.pack(side="left", padx=(60,0), pady=(0,130))
 
         water = Ctk.CTkImage(light_image=Image.open('wave.png'), dark_image=Image.open('wave.png'), size=(300,200))
         water_wave = Ctk.CTkLabel(self.current_frame, text="", image=water)
@@ -46,6 +49,9 @@ class App(Ctk.CTk):
 
         button2 = Ctk.CTkButton(self.menu_frame, text="Image Converter", command=self.show_imgconverter)
         button2.pack()
+
+        button3 = Ctk.CTkButton(self.menu_frame, text="Speedtest", command=self.show_speedtest)
+        button3.pack(pady=20)
 
     def show_youtube(self):
         if self.current_frame:
@@ -91,7 +97,7 @@ class App(Ctk.CTk):
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
 
-        picchanger_label = Ctk.CTkLabel(self.current_frame, text="Picture File Type Changer", font=("Arial", 16))
+        picchanger_label = Ctk.CTkLabel(self.current_frame, text="Picture File Type Changer", font=("Arial", 20, "bold"))
         picchanger_label.pack(pady=20)
 
         self.img_selected_file = Ctk.StringVar()
@@ -173,6 +179,60 @@ class App(Ctk.CTk):
         else:
             CTkMessagebox(title="Error", message=message, icon="error")
 
+    def show_speedtest(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+
+        self.current_frame = Ctk.CTkFrame(self)
+        self.current_frame.pack(fill="both", expand=True)
+
+        overskrift = Ctk.CTkLabel(self.current_frame, text="Speed test", font=("Arial", 16, "bold"))
+        overskrift.pack()
+
+        download_progressbar = Ctk.CTkProgressBar(self.current_frame)
+        download_progressbar.pack(pady=(10,10))
+        download_progressbar.set(0)
+
+        info_label = Ctk.CTkLabel(self.current_frame, text="")
+        info_label.pack(pady=5)
+
+        server_label = Ctk.CTkLabel(self.current_frame, text="")
+        server_label.pack(pady=(10,2))
+
+        results = Ctk.CTkLabel(self.current_frame, text="")
+        results.pack()
+
+        def start():
+            def speedtest_function():
+                st = speedtest.Speedtest()
+                info_label.configure(text="Finding best server...")
+                st.get_best_server()
+
+                res_dict = st.results.dict()
+                server_label.configure(text=f"HOST:{res_dict['server']['country']} | SUPPLIER:{res_dict['server']['sponsor']} | LATENCY: {res_dict['server']['latency']:.2f}")
+                time.sleep(2)
+
+
+                info_label.configure(text="Testing download speed.....")
+                download_speed = st.download(loading_bar) / 1000000  # Convert to Mbps
+
+                download_progressbar.set(0) 
+                info_label.configure(text="Testing upload speed.....")
+                upload_speed = st.upload(loading_bar) / 1000000  # Convert to Mbps
+
+                if download_speed and upload_speed:
+                    results.configure(text=f"Download Speed: {download_speed:.3f} Mbps\n"f"Upload Speed: {upload_speed:.3f} Mbps")
+
+            thread = threading.Thread(target=speedtest_function)
+            thread.start()
+
+        start_test = Ctk.CTkButton(self.current_frame, text="start the test", command=start)
+        start_test.pack(pady=10)
+
+        def loading_bar(i, request_count, end=False, start=False):
+            if end == True:
+                progress = (i + 1)/request_count
+                download_progressbar.set(progress)
 
 if __name__ == "__main__":
     app = App()
