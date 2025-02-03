@@ -2,10 +2,12 @@ import customtkinter as Ctk
 from CTkMessagebox import CTkMessagebox
 import youtubedown
 import imgConverter
+import videoConverter
 import speedtest
 from PIL import Image
 import time
 import threading
+import subprocess
 
 class App(Ctk.CTk):
     def __init__(self):
@@ -50,8 +52,14 @@ class App(Ctk.CTk):
         button2 = Ctk.CTkButton(self.menu_frame, text="Image Converter", command=self.show_imgconverter)
         button2.pack()
 
-        button3 = Ctk.CTkButton(self.menu_frame, text="Speedtest", command=self.show_speedtest)
+        button3 = Ctk.CTkButton(self.menu_frame, text="Speed Test", command=self.show_speedtest)
         button3.pack(pady=20)
+
+        button4 = Ctk.CTkButton(self.menu_frame, text="Video Converter", command=self.show_video_converter)
+        button4.pack()
+
+        button5 = Ctk.CTkButton(self.menu_frame, text="Mp4 to Gif", command=self.show_gif_converter)
+        button5.pack(pady=20)
 
     def show_youtube(self):
         if self.current_frame:
@@ -84,7 +92,7 @@ class App(Ctk.CTk):
         mp3_radio = Ctk.CTkRadioButton(self.current_frame, text="MP3", variable=file_type, value="mp3", font=("Arial", 10))
         mp3_radio.pack()
 
-        download_button = Ctk.CTkButton(self.current_frame, text="Download", font=("Arial", 12), command=handle_youtube_download )
+        download_button = Ctk.CTkButton(self.current_frame, text="Download", font=("Arial", 12), command=handle_youtube_download)
         download_button.pack(pady=20)
 
         back_button_youtube = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
@@ -186,21 +194,12 @@ class App(Ctk.CTk):
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
 
-        overskrift = Ctk.CTkLabel(self.current_frame, text="Speed test", font=("Arial", 16, "bold"))
-        overskrift.pack()
+        overskrift = Ctk.CTkLabel(self.current_frame, text="Internett Speed Test", font=("Arial", 20, "bold"))
+        overskrift.pack(pady=(20))
 
         download_progressbar = Ctk.CTkProgressBar(self.current_frame)
         download_progressbar.pack(pady=(10,10))
         download_progressbar.set(0)
-
-        info_label = Ctk.CTkLabel(self.current_frame, text="")
-        info_label.pack(pady=5)
-
-        server_label = Ctk.CTkLabel(self.current_frame, text="")
-        server_label.pack(pady=(10,2))
-
-        results = Ctk.CTkLabel(self.current_frame, text="")
-        results.pack()
 
         def start():
             def speedtest_function():
@@ -229,10 +228,54 @@ class App(Ctk.CTk):
         start_test = Ctk.CTkButton(self.current_frame, text="start the test", command=start)
         start_test.pack(pady=10)
 
+        info_label = Ctk.CTkLabel(self.current_frame, text="")
+        info_label.pack(pady=5)
+
+        server_label = Ctk.CTkLabel(self.current_frame, text="")
+        server_label.pack(pady=(10,2))
+
+        results = Ctk.CTkLabel(self.current_frame, text="")
+        results.pack()
+
         def loading_bar(i, request_count, end=False, start=False):
             if end == True:
                 progress = (i + 1)/request_count
                 download_progressbar.set(progress)
+    
+    def show_video_converter(self):
+        if self.current_frame:
+                self.current_frame.destroy()
+            
+        self.current_frame = Ctk.CTkFrame(self)
+        self.current_frame.pack(fill="both", expand=True)
+            
+        file_var = Ctk.StringVar()
+        format_var = Ctk.StringVar(value="mp4")
+            
+        video_label = Ctk.CTkLabel(self.current_frame, text="Video Converter", font=("Arial",20,"bold"))
+        video_label.pack(pady=(10,0))
+            
+        select_file_button = Ctk.CTkButton(self.current_frame, text="Select Media File", command=lambda: file_var.set(videoConverter.select_file()))
+        select_file_button.pack(pady=20)
+            
+        format_menu = Ctk.CTkComboBox(self.current_frame, values=["mp4", "avi", "mkv", "mov", "mp3", "wav"], variable=format_var)
+        format_menu.pack(pady=10)
+            
+        convert_button = Ctk.CTkButton(self.current_frame, text="Convert", command=lambda: videoConverter.convert_media(file_var.get(), format_var.get()))
+        convert_button.pack(pady=10)
+            
+        delete_button = Ctk.CTkButton(self.current_frame, text="Delete Original File", command=lambda: videoConverter.delete_original(file_var.get()))
+        delete_button.pack(pady=10)
+            
+        video_warning_label = Ctk.CTkLabel(self.current_frame, text="Warning: Big video files with high quality and frame rate can cause high pc usage!", font=("Arial",12), text_color="Red")
+        video_warning_label.pack(pady=10)
+
+    def show_gif_converter(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+
+        
+
 
 if __name__ == "__main__":
     app = App()

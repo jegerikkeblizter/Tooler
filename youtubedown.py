@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 from tkinter import messagebox, filedialog
 
 ffmpeg_path = os.path.join(os.path.dirname(__file__), 'ffmpeg.exe')
@@ -23,16 +24,32 @@ def download_youtube_video(youtube_url, output_path, file_type):
         else:
             return "Unsupported file type."
 
+        # Før nedlastingen, hent eksisterende filer i output_path
+        existing_files = set(os.listdir(output_path))
+
         video_path = os.path.join(output_path, "%(title)s.%(ext)s")
         command = [
             yt_dlp_path,
             "-f", format_option,
             "-o", video_path,
-            "--ffmpeg-location", ffmpeg_path
+            "--ffmpeg-location", ffmpeg_path,
+            "--postprocessor-args", "-y"  # Legger til -y for FFmpeg
         ] + extra_options + [youtube_url]
+  
 
-        subprocess.run(command, check=True)
+        # Run yt-dlp without printing to terminal
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Finn den opprinnelige nedlastede filen før den konverteres
+        new_files = set(os.listdir(output_path)) - existing_files
+        if new_files:
+            original_file = max(new_files, key=lambda f: os.path.getmtime(os.path.join(output_path, f)))
+            original_file_path = os.path.join(output_path, original_file)
+            current_time = time.time()
+            os.utime(original_file_path, (current_time, current_time))
+
         return "Download completed successfully!"
+        
     except subprocess.CalledProcessError as e:
         return f"An error occurred during download: {e}"
     except Exception as e:
