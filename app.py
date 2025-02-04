@@ -8,6 +8,8 @@ from PIL import Image
 import time
 import threading
 import subprocess
+import os
+import ffmpeg
 
 class App(Ctk.CTk):
     def __init__(self):
@@ -58,8 +60,11 @@ class App(Ctk.CTk):
         button4 = Ctk.CTkButton(self.menu_frame, text="Video Converter", command=self.show_video_converter)
         button4.pack()
 
-        button5 = Ctk.CTkButton(self.menu_frame, text="Mp4 to Gif", command=self.show_gif_converter)
+        button5 = Ctk.CTkButton(self.menu_frame, text="MP4 To GIF", command=self.show_mp4togif)
         button5.pack(pady=20)
+
+        back_button_youtube = Ctk.CTkButton(self.menu_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
+        back_button_youtube.pack(side="bottom", pady=(0,20))
 
     def show_youtube(self):
         if self.current_frame:
@@ -94,9 +99,6 @@ class App(Ctk.CTk):
 
         download_button = Ctk.CTkButton(self.current_frame, text="Download", font=("Arial", 12), command=handle_youtube_download)
         download_button.pack(pady=20)
-
-        back_button_youtube = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
-        back_button_youtube.pack(pady=10)
     
     def show_imgconverter(self):
         if self.current_frame:
@@ -134,9 +136,6 @@ class App(Ctk.CTk):
         self.delete_button = Ctk.CTkButton(self.current_frame, text="Delete Original Image", command=self.delete_original_image, font=("Arial", 12),
                                            state="disabled")
         self.delete_button.pack(pady=10)
-
-        back_button_picchanger = Ctk.CTkButton(self.current_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
-        back_button_picchanger.pack(pady=10)
 
         copyright_label = Ctk.CTkLabel(self.current_frame, text="© 2024 Dem Som Vet", font=("Arial", 10))
         copyright_label.pack(side="bottom", pady=10)
@@ -270,9 +269,97 @@ class App(Ctk.CTk):
         video_warning_label = Ctk.CTkLabel(self.current_frame, text="Warning: Big video files with high quality and frame rate can cause high pc usage!", font=("Arial",12), text_color="Red")
         video_warning_label.pack(pady=10)
 
-    def show_gif_converter(self):
+    
+    def show_mp4togif(self):
         if self.current_frame:
             self.current_frame.destroy()
+
+        self.current_frame = Ctk.CTkFrame(self)
+        self.current_frame.pack(fill="both", expand=True)
+
+        ffmpeg_path = os.path.join(os.path.dirname(__file__), 'ffmpeg.exe')
+        self.selected_file = None
+
+        def check_ffmpeg():
+            if not os.path.exists(ffmpeg_path):
+                CTkMessagebox (title="Error", text="FFmpeg not found at {ffmpeg_path}. Please ensure 'ffmpeg.exe' is in the script directory.", icon="warning")
+                return False
+            return True
+
+        def select_file():
+            root = Ctk.CTk()
+            root.withdraw()
+            root.update()
+            file_path = Ctk.filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")])
+            root.destroy()
+            if file_path:
+                self.selected_file = file_path
+                selected_label.configure(text=f"Selected file: {self.selected_file}")
+            else:
+                selected_label.configure(text=f"No Selected file.")
+
+        def mp4_to_gif(fps: int = 10, scale: int = -1):
+            def gif_start():
+
+                if not check_ffmpeg():
+                    return
+
+                if not self.selected_file:
+                    selected_label.configure(text="No selected files")
+
+                if not os.path.exists(self.selected_file):
+                    raise FileNotFoundError (CTkMessagebox(text=f"Input file {self.selected_file} does not exist."))
+                
+                self.selected_file = self.selected_file
+                
+                output_file = os.path.splitext(self.selected_file)[0] + ".gif"
+                
+                try:
+                    (
+                        ffmpeg
+                        .input(self.selected_file)
+                        .filter('fps', fps=fps)
+                        .filter('scale', scale, -1)
+                        .output(output_file, format='gif')
+                        .run(cmd=ffmpeg_path, overwrite_output=True)
+                    )
+                    CTkMessagebox(title="Success", message=f"Successfully converted {self.selected_file} to {output_file}")
+                except ffmpeg.Error as e:
+                    CTkMessagebox(title="Error", message=f"Error converting file: {e}", icon="warning")
+        
+            thread_gif = threading.Thread(target=gif_start)
+            thread_gif.start()
+
+
+        def start_conv_gif():
+            mp4_to_gif(fps=15, scale=500)
+
+        def delete_original_mp4():
+            if self.selected_file:
+                try:
+                    os.remove(self.selected_file)
+                    return True, CTkMessagebox (message=f"The original image file {self.selected_file} has been deleted.", title="Success")
+                except Exception as e:
+                    return False, CTkMessagebox(message=f"An error occurred while deleting the file: {e}", title="ERROR 554", icon="warning")
+            elif not self.selected_file:
+                CTkMessagebox(message="An error occurred, No file is choosen!", title="ERROR 903", icon="warning")
+
+
+        mp4_to_gif_label = Ctk.CTkLabel(self.current_frame, text="MP4 To GIF", font=("Arial", 20, "bold"))
+        mp4_to_gif_label.pack(pady=20)
+
+        select_button = Ctk.CTkButton(self.current_frame, text="Select file", command=select_file, font=("Arial", 12))
+        select_button.pack(pady=10)
+
+        selected_label = Ctk.CTkLabel(self.current_frame, text="")
+        selected_label.pack(pady=5)
+
+        conver_gif_button = Ctk.CTkButton(self.current_frame, text="Convert", command=start_conv_gif, font=("Arial", 12))
+        conver_gif_button.pack(pady=15)
+
+        delete_original_button = Ctk.CTkButton(self.current_frame, text="Delete original file", command=delete_original_mp4)
+        delete_original_button.pack(pady=15)
+
 
         
 
