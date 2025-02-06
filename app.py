@@ -15,13 +15,26 @@ import mss
 import pytesseract
 import pygetwindow as gw
 from deep_translator import GoogleTranslator
+import keyboard
+import mouse
+import ctypes
+from time import sleep
+import random
+import sys
+import os
+
+# Fix potential sys.stdout issues in PyInstaller EXE
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 
 class App(Ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Tooler")
         self.geometry("800x500")
-        self.wm_iconbitmap("tooler.ico")
 
         self.current_frame = None
         self.menu_frame = None
@@ -40,6 +53,8 @@ class App(Ctk.CTk):
         if self.current_frame or self.menu_frame:
             self.current_frame.destroy()
             self.menu_frame.destroy()
+            
+        self.destroy_main_interface()
 
         self.current_frame = Ctk.CTkFrame(self, corner_radius=0, border_color="black", border_width=0.7)
         self.current_frame.pack(side="right", fill="both", expand=True)
@@ -56,9 +71,27 @@ class App(Ctk.CTk):
         whats_new_text = Ctk.CTkLabel(self.current_frame, text="• Changed from Tkinter to CustomTkinter\n\n""• Updated UI\n\n""• Added ICO picture\n\n""• Cleaned up code\n\n""• MORE NEW TOOLS!\n\n""• New logo\n\n""• New brand name", justify="left" ,font=("Arial", 15))
         whats_new_text.pack(side="left", padx=(60,0), pady=(0,130))
 
-        water = Ctk.CTkImage(light_image=Image.open('wave.png'), dark_image=Image.open('wave.png'), size=(300,200))
+        def get_resource_path(relative_path):
+            if getattr(sys, 'frozen', False):  # Sjekker om programmet kjører som en .exe
+                base_path = sys._MEIPASS  # Midlertidig mappe for PyInstaller
+            else:
+                base_path = os.path.abspath(".")
+
+            return os.path.join(base_path, relative_path)
+
+        # Hent riktig filbane
+        image_path = get_resource_path("wave.png")
+
+        # Opprett CustomTkinter Image med riktig bane
+        water = Ctk.CTkImage(
+            light_image=Image.open(image_path),
+            dark_image=Image.open(image_path),
+            size=(300, 200)
+        )
+
+        # Bruk bildet i en CTkLabel
         water_wave = Ctk.CTkLabel(self.current_frame, text="", image=water)
-        water_wave.pack(side="right", pady=(0,150))
+        water_wave.pack(side="right", pady=(0, 150))
 
 
         button = Ctk.CTkButton(self.menu_frame, text="Youtube Downloader", command=self.show_youtube)
@@ -79,12 +112,17 @@ class App(Ctk.CTk):
         button6 = Ctk.CTkButton(self.menu_frame, text="Chat Translator", command=self.show_translate_page)
         button6.pack()
 
+        button7 = Ctk.CTkButton(self.menu_frame, text="Auto Clicker", command=self.show_autoclicker)
+        button7.pack(pady=20)
+
         back_button_youtube = Ctk.CTkButton(self.menu_frame, text="Back to Homepage", command=self.show_homepage, font=("Arial", 12))
         back_button_youtube.pack(side="bottom", pady=(0,20))
 
     def show_youtube(self):
         if self.current_frame:
             self.current_frame.destroy()
+
+        self.destroy_main_interface()
 
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
@@ -119,6 +157,8 @@ class App(Ctk.CTk):
     def show_imgconverter(self):
         if self.current_frame:
             self.current_frame.destroy()
+
+        self.destroy_main_interface()
 
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
@@ -205,6 +245,8 @@ class App(Ctk.CTk):
     def show_speedtest(self):
         if self.current_frame:
             self.current_frame.destroy()
+            
+        self.destroy_main_interface()
 
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
@@ -260,6 +302,8 @@ class App(Ctk.CTk):
     def show_video_converter(self):
         if self.current_frame:
                 self.current_frame.destroy()
+
+        self.destroy_main_interface()
             
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
@@ -289,6 +333,8 @@ class App(Ctk.CTk):
     def show_mp4togif(self):
         if self.current_frame:
             self.current_frame.destroy()
+
+        self.destroy_main_interface()
 
         self.current_frame = Ctk.CTkFrame(self)
         self.current_frame.pack(fill="both", expand=True)
@@ -379,6 +425,8 @@ class App(Ctk.CTk):
     def show_translate_page(self):
         if self.current_frame:
             self.current_frame.destroy()
+
+        self.destroy_main_interface()
 
         pytesseract.pytesseract.tesseract_cmd = r"Tesseract-OCR\tesseract.exe"
 
@@ -544,8 +592,526 @@ class App(Ctk.CTk):
         self.stop_button.configure(state="disabled")
         self.output_text.insert("end", "🛑 Translation stopped.\n")
 
+    def destroy_main_interface(self):
+            if hasattr(self, 'main_frame') and self.main_frame:
+                self.main_frame.destroy()
+                self.main_frame = None  # Fjern referanse
 
-        
+            if hasattr(self, 'info_frame') and self.info_frame:
+                self.info_frame.destroy()
+                self.info_frame = None  # Fjern referanse
+                
+            if hasattr(self, 'buttons_frame') and self.buttons_frame:
+                self.buttons_frame.destroy()
+                self.buttons_frame = None  # Set to None after destruction
+
+    def show_autoclicker(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+            
+        self.destroy_main_interface()
+
+        self.stop_main_thread = False
+
+        self.interval_ms = Ctk.StringVar(value='100')
+        self.interval_s = Ctk.StringVar(value='0')
+        self.interval_min = Ctk.StringVar(value='0')
+        self.interval_hr = Ctk.StringVar(value='0')
+
+        self.interval_ms.trace('w', lambda x, y, z: self.validate(self.interval_ms))
+        self.interval_s.trace('w', lambda x, y, z: self.validate(self.interval_s))
+        self.interval_min.trace('w', lambda x, y, z: self.validate(self.interval_min))
+        self.interval_hr.trace('w', lambda x, y, z: self.validate(self.interval_hr))
+
+        self.mouse_button = Ctk.StringVar(value='Left')
+        self.hotkey = Ctk.StringVar(value='f8')
+
+        self.super_mode = Ctk.BooleanVar(value=False)
+
+            # Advanced options
+        self.random_time_offset_enabled = Ctk.BooleanVar(value=False)
+        self.random_time_offset = Ctk.StringVar(value='0')
+
+        self.random_mouse_offset_enabled = Ctk.BooleanVar(value=False)
+        self.random_mouse_offset_x = Ctk.StringVar(value='0')
+        self.random_mouse_offset_y = Ctk.StringVar(value='0')
+
+        self.click_type = Ctk.StringVar(value='Single')
+        self.hold_duration = Ctk.StringVar(value='0')
+
+        self.repeat_option = Ctk.StringVar(value='Toggle')
+        self.repeat_value = Ctk.StringVar(value='0')
+
+        self.killswitch_hotkey = Ctk.StringVar(value='Ctrl+Shift+K')
+
+
+        self.random_time_offset.trace('w', lambda x, y, z: self.validate(self.random_time_offset))
+        self.random_mouse_offset_x.trace('w', lambda x, y, z: self.validate(self.random_mouse_offset_x))
+        self.random_mouse_offset_y.trace('w', lambda x, y, z: self.validate(self.random_mouse_offset_y))
+        self.hold_duration.trace('w', lambda x, y, z: self.validate(self.hold_duration))
+        self.repeat_value.trace('w', lambda x, y, z: self.validate(self.repeat_value))
+
+        self.main_frame = MainFrame(self)
+        self.buttons_frame = ButtonsFrame(self)
+        self.info_frame = InfoFrame(self)
+
+        keyboard.add_hotkey('Ctrl+Shift+K', self.destroy)
+
+    def get_interval_sum(self) -> float | int:
+        return (self.normalize(self.interval_ms) * 0.001
+                + self.normalize(self.interval_s)
+                + self.normalize(self.interval_min) * 60
+                + self.normalize(self.interval_hr) * 3600)
+
+    def start_clicking(self) -> None:
+        self.stop_main_thread = False
+
+        keyboard.remove_hotkey(self.hotkey.get())
+        self.buttons_frame.start_button.configure(state='disabled')
+        self.buttons_frame.stop_button.configure(state='normal')
+
+        keyboard.add_hotkey(self.hotkey.get(), self.stop_clicking)
+
+        threading.Thread(
+            target=self.clicking_thread,
+            daemon=True
+        ).start()
+
+    def stop_clicking(self) -> None:
+        self.stop_main_thread = True
+
+        keyboard.remove_hotkey(self.hotkey.get())
+
+        self.buttons_frame.start_button.configure(state='normal')
+        self.buttons_frame.stop_button.configure(state='disabled')
+
+        keyboard.add_hotkey(self.hotkey.get(), self.start_clicking)
+
+    def clicking_thread(self) -> None:
+
+        if self.super_mode.get():
+            user32 = ctypes.WinDLL('user32', use_last_error=True)
+                # Directly calling system to click even faster (really unstable)
+                # Ignores all preferences for speed performance
+                # 0x201 - LEFTBUTTONDOWN
+                # 0x202 - LEFTBUTTONUP
+            while not self.stop_main_thread:
+                user32.mouse_event(0x201, 0, 0, 0, 0)
+                user32.mouse_event(0x202, 0, 0, 0, 0)
+            exit()
+
+        mouse_button = self.mouse_button.get().lower()
+        click_interval = self.get_interval_sum()
+
+        if self.repeat_option.get() == 'Repeat':
+            self.repeat_clicking(mouse_button, click_interval)
+        else:
+            self.toggle_clicking(mouse_button, click_interval)
+
+        exit()
+
+    def repeat_clicking(self, mouse_button, click_interval) -> None:
+        repeat_amount = int(self.repeat_value.get())
+        while not self.stop_main_thread and repeat_amount > 0:
+
+            if self.random_mouse_offset_enabled:
+                x = random.randint(
+                    -int(self.random_mouse_offset_x.get()), int(self.random_mouse_offset_x.get())
+                )
+                y = random.randint(
+                    -int(self.random_mouse_offset_y.get()), int(self.random_mouse_offset_y.get())
+                )
+                mouse.move(x, y, absolute=False)
+
+            mouse.press(mouse_button)
+            sleep(int(self.hold_duration.get()) / 1000)
+            mouse.release(mouse_button)
+
+            if self.click_type.get() == 'Double':
+                mouse.press(mouse_button)
+                sleep(int(self.hold_duration.get()) / 1000)
+                mouse.release(mouse_button)
+
+            sleep(
+                click_interval + random.uniform(0, int(self.random_time_offset.get()) / 1000)
+                if self.random_time_offset_enabled else click_interval
+            )
+
+            if self.random_mouse_offset_enabled:
+                mouse.move(-x, -y, absolute=False)
+
+            repeat_amount -= 1
+
+        self.stop_clicking()
+
+    def toggle_clicking(self, mouse_button, click_interval) -> None:
+        while not self.stop_main_thread:
+
+            if self.random_mouse_offset_enabled.get():
+                x = random.randint(
+                        -int(self.random_mouse_offset_x.get()), int(self.random_mouse_offset_x.get())
+                )
+                y = random.randint(
+                    -int(self.random_mouse_offset_y.get()), int(self.random_mouse_offset_y.get())
+                )
+                mouse.move(x, y, absolute=False)
+
+            mouse.press(mouse_button)
+            sleep(int(self.hold_duration.get()) / 1000)
+            mouse.release(mouse_button)
+
+            if self.click_type.get() == 'Double':
+                mouse.press(mouse_button)
+                sleep(int(self.hold_duration.get()) / 1000)
+                mouse.release(mouse_button)
+
+            sleep(click_interval + random.uniform(0, int(self.random_time_offset.get()) / 1000)
+                if self.random_time_offset_enabled else click_interval)
+
+            if self.random_mouse_offset_enabled.get():
+                mouse.move(-x, -y, absolute=False)
+
+    def change_hotkey(self) -> None:
+        keyboard.remove_hotkey(self.hotkey.get())
+        hotkey_created = False
+        new_hotkey = []
+        used_modifiers = []
+        self.buttons_frame.change_hotkey_button.configure(text='Press any key...')
+
+        def callback(key) -> None:
+            nonlocal hotkey_created
+            if key.name not in keyboard.all_modifiers:
+                new_hotkey.append(key.name)
+                hotkey_created = True
+                return
+            if key.name not in used_modifiers:
+                    new_hotkey.append(key.name)
+                    used_modifiers.append(key.name)
+
+        keyboard.hook(callback)
+
+        def wait_for_callback() -> None:
+            while not hotkey_created:
+                sleep(0.01)
+            keyboard.unhook(callback)
+            hotkey = '+'.join(new_hotkey)
+
+            self.hotkey.set(hotkey)
+            keyboard.add_hotkey(self.hotkey.get(), self.start_clicking)
+
+            self.buttons_frame.change_hotkey_button.configure(text='Change Hotkey')
+
+            self.buttons_frame.start_button.configure(text=f"Start: {self.hotkey.get().replace('+', '-').title()}")
+            self.buttons_frame.stop_button.configure(text=f"Stop: {self.hotkey.get().replace('+', '-').title()}")
+
+            exit()
+
+        threading.Thread(target=wait_for_callback, daemon=True).start()
+
+    @staticmethod
+    def normalize(variable: Ctk.StringVar) -> int:
+        if variable.get() == '':
+            return 0
+        return int(variable.get())
+
+    @staticmethod
+    def validate(variable: Ctk.StringVar) -> None:
+        # Should be used in entry traces
+        variable_text = variable.get()
+        for letter in variable_text:
+            if not letter.isdigit():
+                variable_text = variable_text.replace(letter, '')
+            variable.set(variable_text)
+
+
+class MainFrame(Ctk.CTkFrame):
+    def __init__(self, master: App):
+        super().__init__(master)
+        self.pack(expand=True, fill='both', padx=5, pady=5)
+
+        self.info_frame = MainFrameInfoFrame(self, master)
+        self.interval_frame = IntervalFrame(self, master)
+
+
+class MainFrameInfoFrame(Ctk.CTkFrame):
+    def __init__(self, master, root: App):
+        super().__init__(master, fg_color='transparent')
+        self.pack(expand=True, fill='x')
+
+        self.description = Ctk.CTkLabel(self, text='Click Interval:')
+        self.description.pack(side='left', padx=10)
+
+        self.advanced_options = Ctk.CTkButton(
+            self,
+            text='>>',
+            width=40,
+            command=lambda: AdvancedOptions(root),
+        )
+        self.advanced_options.pack(side='right', padx=5, pady=10)
+
+        self.dropdown = Ctk.CTkOptionMenu(
+            self,
+            values=['Left', 'Right', 'Middle'],
+            variable=root.mouse_button,
+            )
+            
+        self.dropdown.pack(side='right', padx=5, pady=10)
+
+        self.dropdown_label = Ctk.CTkLabel(self, text='Mouse Button:')
+        self.dropdown_label.pack(side='right', padx=5, pady=10)
+
+
+class IntervalFrame(Ctk.CTkFrame):
+    def __init__(self, master, root: App):
+        super().__init__(master, fg_color='transparent')
+        self.pack(expand=True, fill='x', padx=5)
+
+        self.label_ms = IntervalFrameLabel(self, text='Ms:')
+        self.entry_ms = IntervalFrameEntry(self, root.interval_ms, width=60)
+
+        self.label_sec = IntervalFrameLabel(self, text='Sec:')
+        self.entry_sec = IntervalFrameEntry(self, root.interval_s, width=60)
+
+        self.label_min = IntervalFrameLabel(self, text='Min:')
+        self.entry_min = IntervalFrameEntry(self, root.interval_min, width=60)
+
+        self.label_hr = IntervalFrameLabel(self, text='Hr:')
+        self.entry_hr = IntervalFrameEntry(self, root.interval_hr, width=60)
+
+
+class IntervalFrameEntry(Ctk.CTkEntry):
+    def __init__(self, master, interval_variable, *, width):
+        super().__init__(master, textvariable=interval_variable, width=width)
+        self.pack(side='left', expand=True, fill='x', padx=5, pady=5)
+
+
+class IntervalFrameLabel(Ctk.CTkLabel):
+    def __init__(self, master, *, text):
+        super().__init__(master, text=text, )
+        self.pack(side='left', expand=True, fill='x', padx=5, pady=5)
+
+
+class ButtonsFrame(Ctk.CTkFrame):
+    def __init__(self, master: App):
+        super().__init__(master, fg_color='transparent')
+        self.pack(expand=True, fill='y', padx=5, pady=5)
+
+        self.start_button = Ctk.CTkButton(
+            self,
+            text=f"Start: {master.hotkey.get().replace('+', '-').title()}",
+            command=lambda: master.start_clicking(),
+        )
+
+        self.start_button.pack(side='left', expand=True, padx=5)
+
+        self.stop_button = Ctk.CTkButton(
+            self,
+            text=f"Stop: {master.hotkey.get().replace('+', '-').title()}",
+            state='disabled',
+            command=lambda: master.stop_clicking(),
+        )
+        self.stop_button.pack(side='left', expand=True, padx=5)
+
+        self.change_hotkey_button = Ctk.CTkButton(
+            self,
+            text='Change Hotkey',
+            command=lambda: master.change_hotkey(),
+        )
+        self.change_hotkey_button.pack(side='left', expand=True, padx=5)
+
+        keyboard.add_hotkey((master.hotkey.get()), master.start_clicking)
+
+
+class InfoFrame(Ctk.CTkFrame):
+    def __init__(self, master: App):
+        super().__init__(master, fg_color='transparent')
+        self.pack(fill='x', padx=10, pady=5)
+        self.killswitch_label = Ctk.CTkLabel(self, text=f'Killswitch: {master.killswitch_hotkey.get().replace("+", "-").title()}')
+        self.killswitch_label.pack(side='left')
+
+        self.super_mode_switch = Ctk.CTkSwitch(self, text='Super Mode', variable=master.super_mode)
+        self.super_mode_switch.pack(side='right', padx=5)
+
+
+class AdvancedOptions(Ctk.CTkToplevel):
+    def __init__(self, root: App):
+        super().__init__()
+        self.title("Advanced Options")
+        self.grab_set()
+        self.geometry(
+            f"500x300"
+            f"+{int(self.winfo_screenwidth() / 2 - 500 / 2)}"
+            f"+{int(self.winfo_screenheight() / 2 - 300 / 2)}"
+        )
+        self.resizable(False, False)
+
+        self.rowconfigure((0, 1, 2), weight=3, uniform='a')
+        self.columnconfigure((0, 1), weight=1, uniform='a')
+
+        self.root = root
+
+        self.time_offset = TimeOffset(self)
+        self.mouse_offset = MouseOffset(self)
+        self.click_type = ClickType(self)
+        self.repeat_options = RepeatOptions(self)
+        self.killswitch = KillSwitch(self)
+
+    def change_killswitch_hotkey(self, buttons_frame):
+        keyboard.remove_hotkey(self.root.killswitch_hotkey.get())
+        hotkey_created = False
+        new_hotkey = []
+        used_modifiers = []
+        buttons_frame.change_killswitch_hotkey.configure(text='Press any key...')
+
+        def callback(key):
+            nonlocal hotkey_created
+            if key.name not in keyboard.all_modifiers:
+                new_hotkey.append(key.name)
+                hotkey_created = True
+                return
+            if key.name not in used_modifiers:
+                new_hotkey.append(key.name)
+                used_modifiers.append(key.name)
+
+        keyboard.hook(callback)
+
+        def wait_for_callback():
+            while not hotkey_created:
+                sleep(0.01)
+            keyboard.unhook(callback)
+            hotkey = '+'.join(new_hotkey)
+
+            self.root.killswitch_hotkey.set(hotkey)
+            keyboard.add_hotkey(self.root.killswitch_hotkey.get(), self.root.destroy)
+
+            buttons_frame.change_killswitch_hotkey.configure(text='Change KillSwitch Hotkey')
+            buttons_frame.killswitch_hotkey.configure(
+                text=f"{self.root.killswitch_hotkey.get().replace('+', '-').title()}"
+            )
+            self.root.info_frame.killswitch_label.configure(text=f'Killswitch: {hotkey.replace("+", "-").title()}')
+            exit()
+
+        threading.Thread(target=wait_for_callback, daemon=True).start()
+
+class TimeOffset(Ctk.CTkFrame):
+    def __init__(self, master: AdvancedOptions):
+        super().__init__(master)
+        self.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+
+        self.switch = Ctk.CTkSwitch(
+            self,
+            text='Random Time Offset',
+            variable=master.root.random_time_offset_enabled,
+        )
+        self.switch.place(relx=0.05, rely=0.1)
+
+        self.label = Ctk.CTkLabel(self, text='Milliseconds')
+        self.label.place(relx=0.05, rely=0.55)
+
+        self.entry = Ctk.CTkEntry(self, width=60, textvariable=master.root.random_time_offset)
+        self.entry.place(relx=0.4, rely=0.55)
+
+
+class MouseOffset(Ctk.CTkFrame):
+    def __init__(self, master: AdvancedOptions):
+        super().__init__(master)
+        self.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+
+        self.switch = Ctk.CTkSwitch(
+            self,
+            text='Random Mouse Offset',
+            variable=master.root.random_mouse_offset_enabled,
+        )
+        self.switch.place(relx=0.05, rely=0.1)
+
+        self.x = Ctk.CTkLabel(self, text='X:')
+        self.x.place(relx=0.05, rely=0.55)
+
+        self.x_entry = Ctk.CTkEntry(self, width=60, textvariable=master.root.random_mouse_offset_x)
+        self.x_entry.place(relx=0.15, rely=0.55)
+
+        self.y = Ctk.CTkLabel(self, text='Y:')
+        self.y.place(relx=0.45, rely=0.55)
+
+        self.y_entry = Ctk.CTkEntry(self, width=60, textvariable=master.root.random_mouse_offset_y)
+        self.y_entry.place(relx=0.55, rely=0.55)
+
+
+class ClickType(Ctk.CTkFrame):
+    def __init__(self, master: AdvancedOptions):
+        super().__init__(master)
+        self.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
+
+        self.description = Ctk.CTkLabel(self, text='Click Type:')
+        self.description.place(relx=0.05, rely=0.1)
+
+        self.option_menu = Ctk.CTkOptionMenu(
+            self,
+            values=['Single', 'Double'],
+            width=135,
+            variable=master.root.click_type,
+        )
+
+        self.option_menu.place(relx=0.37, rely=0.1)
+
+        self.hold_label = Ctk.CTkLabel(
+            self, text='Hold duration (ms):'
+        )
+        self.hold_label.place(relx=0.05, rely=0.55)
+
+        self.hold_entry = Ctk.CTkEntry(
+            self,
+            width=60,
+            textvariable=master.root.hold_duration
+        )
+        self.hold_entry.place(relx=0.6, rely=0.55)
+
+
+class RepeatOptions(Ctk.CTkFrame):
+    def __init__(self, master: AdvancedOptions):
+        super().__init__(master)
+        self.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
+
+        self.description = Ctk.CTkLabel(self, text='Repeat Options:')
+        self.description.place(relx=0.05, rely=0.1)
+
+        self.toggle = Ctk.CTkRadioButton(
+            self,
+            text='Toggle',
+            variable=master.root.repeat_option,
+            value='Toggle',
+        )
+        self.toggle.place(relx=0.05, rely=0.55)
+
+        self.repeat = Ctk.CTkRadioButton(
+            self,
+            text='Repeat',
+            variable=master.root.repeat_option,
+            value='Repeat',
+        )
+        self.repeat.place(relx=0.4, rely=0.55)
+
+        self.entry = Ctk.CTkEntry(self, width=50, textvariable=master.root.repeat_value)
+        self.entry.place(relx=0.75, rely=0.53)
+
+
+class KillSwitch(Ctk.CTkFrame):
+    def __init__(self, master: AdvancedOptions):
+        super().__init__(master)
+        self.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
+
+        self.change_killswitch_hotkey = Ctk.CTkButton(
+            self,
+            text='Change KillSwitch Hotkey',
+            command=lambda: master.change_killswitch_hotkey(self),
+        )
+        self.change_killswitch_hotkey.place(relx=0.5, rely=0.15, anchor='n')
+
+        self.killswitch_hotkey = Ctk.CTkLabel(
+            self,
+            text=f"{master.root.killswitch_hotkey.get().replace('+', '-').title()}"
+        )
+        self.killswitch_hotkey.place(relx=0.5, rely=0.6, anchor='n')
 
 
 if __name__ == "__main__":
