@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - Tooler</title>
+    <link rel="stylesheet" href="download.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Tooler</a>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        <div class="menu">
+            <a href="index.html">Home</a>
+            <a href="download.html">Download</a>
+            <a href="info.html">Info</a>
+        </div>
+    </nav>
+    
+    <section class="download-section">
+        <h1>Download Tooler Tools</h1>
+        <p>Choose the tool you want to download:</p>
+        <br>
+        <br>
+
+        <div class="download-buttons">
+            <p>Download latest tool here.</p>
+            <a class="download-btn" href="https://github.com/jegerikkeblizter/Tooler-apps/releases/download/Tooler-2.0/Tooler.2.0.exe" download>Tooler 2.0</a>
+            <br>
+            <br>
+            <p>You can find the older version of the tool here.</p>
+            <a class="download-btn" href="https://github.com/jegerikkeblizter/Tooler-apps/releases/download/Daglig-app/Din-Daglige-App.exe" download>Din Daglige App</a>
+            
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Tooler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector('.menu').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

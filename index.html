@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tooler Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Tooler</a>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        <div class="menu">
+            <a href="index.html">Home</a>
+            <a href="download.html">Download</a>
+            <a href="info.html">Info</a>
+        </div>
+    </nav>
+    <script>
+        function toggleMenu() {
+            document.querySelector('.menu').classList.toggle('active');
+        }
+    </script>
+    <div class="main-content">
+        <div class="text">
+            <h1>Welcome to Tooler</h1>
+            <p>Our app offers a clean, intuitive interface for downloading YouTube videos in excellent quality, plus a versatile image format converter. Built with Python, it’s designed to provide a smooth and reliable experience for all users. Whether you’re saving videos or converting images, the app makes tasks quick and effortless.</p>
+            <a href="download.html" class="btn">Download</a>
+        </div>
+        <div class="image">
+            <img src="tooler.ico" alt="Illustrasjon">
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Tooler. All rights reserved.</p>
+    </footer>
+</body>
+</html>
